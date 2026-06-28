@@ -1,0 +1,140 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}WhoGotMe — Threat Intelligence Dashboard{% endblock %}
+
+{% block body %}
+<div class="page dashboard-page">
+  <div class="radial-glow"></div>
+
+  <nav class="nav nav-sticky">
+    <div class="nav-brand">
+      <svg class="icon icon-cyan" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span class="logo-text">WHOGOTME</span>
+      <span class="nav-badge">ANALYTICS</span>
+    </div>
+    <a href="{% url 'landing' %}" class="btn btn-outline">
+      <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      Check Email
+    </a>
+  </nav>
+
+  <main class="dashboard-main">
+    <header class="page-header">
+      <h1>Threat Intelligence Dashboard</h1>
+      <p>Real-time breach analytics and risk monitoring across the dark web.</p>
+    </header>
+
+    <div class="stat-grid">
+      <div class="glass-card stat-card">
+        <div class="stat-card-top">
+          <div class="stat-icon" style="background:rgba(0,240,255,0.08);border-color:rgba(0,240,255,0.2);color:#00f0ff">🗄</div>
+        </div>
+        <div class="stat-card-value">{{ stats.total_breaches }}</div>
+        <div class="stat-card-label">Total Breaches Indexed</div>
+        <div class="stat-card-delta" style="color:#00f0ff">+124 this month</div>
+      </div>
+      <div class="glass-card stat-card">
+        <div class="stat-card-top">
+          <div class="stat-icon" style="background:rgba(255,56,100,0.08);border-color:rgba(255,56,100,0.2);color:#ff3864">👥</div>
+        </div>
+        <div class="stat-card-value">{{ stats.emails_at_risk }}</div>
+        <div class="stat-card-label">Emails at Risk</div>
+        <div class="stat-card-delta" style="color:#ff3864">+2.1M this week</div>
+      </div>
+      <div class="glass-card stat-card">
+        <div class="stat-card-top">
+          <div class="stat-icon" style="background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.2);color:#f59e0b">⚠</div>
+        </div>
+        <div class="stat-card-value">{{ stats.critical_users }}</div>
+        <div class="stat-card-label">Critical Risk Users</div>
+        <div class="stat-card-delta" style="color:#f59e0b">18% of total</div>
+      </div>
+      <div class="glass-card stat-card">
+        <div class="stat-card-top">
+          <div class="stat-icon" style="background:rgba(168,85,247,0.08);border-color:rgba(168,85,247,0.2);color:#a855f7">📈</div>
+        </div>
+        <div class="stat-card-value">{{ stats.new_breaches }}</div>
+        <div class="stat-card-label">New Breaches (30d)</div>
+        <div class="stat-card-delta" style="color:#a855f7">↑ 12% vs last month</div>
+      </div>
+    </div>
+
+    <div class="chart-grid chart-grid-3">
+      <div class="glass-card chart-card span-2">
+        <div class="chart-header">
+          <div>
+            <h3>Breaches Over Time</h3>
+            <p>Monthly breach count — 2024</p>
+          </div>
+          <span class="chart-badge">12 months</span>
+        </div>
+        <canvas id="timeline-chart" height="150"></canvas>
+      </div>
+      <div class="glass-card chart-card">
+        <div class="chart-header">
+          <div>
+            <h3>Risk Distribution</h3>
+            <p>By severity level (%)</p>
+          </div>
+        </div>
+        <canvas id="risk-chart" height="110"></canvas>
+        <div id="risk-legend" class="risk-legend"></div>
+      </div>
+    </div>
+
+    <div class="chart-grid chart-grid-2">
+      <div class="glass-card chart-card">
+        <div class="chart-header">
+          <div>
+            <h3>Top Breach Sources</h3>
+            <p>Industry sector breakdown</p>
+          </div>
+        </div>
+        <canvas id="sources-chart" height="150"></canvas>
+      </div>
+
+      <div class="glass-card chart-card">
+        <div class="chart-header">
+          <div>
+            <h3 class="flex-center-gap">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00f0ff" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+              Attack Intelligence
+            </h3>
+            <p>Ask about any attack type (e.g. "SQL Injection", "Phishing")</p>
+          </div>
+        </div>
+        <div class="attack-search">
+          <input type="text" id="attack-input" placeholder="Type an attack name..." />
+          <button id="attack-search-btn" class="btn btn-primary">🔍</button>
+        </div>
+        <div id="attack-loading" class="attack-loading hidden">
+          <span></span><span></span><span></span>
+        </div>
+        <div id="attack-result" class="attack-result hidden"></div>
+        <div id="attack-suggestions" class="attack-suggestions">
+          <button type="button" data-query="SQL Injection">SQL Injection</button>
+          <button type="button" data-query="Phishing">Phishing</button>
+          <button type="button" data-query="Ransomware">Ransomware</button>
+          <button type="button" data-query="XSS">XSS</button>
+          <button type="button" data-query="DDoS">DDoS</button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="dashboard-footer">
+      WhoGotMe — Dark Web Monitoring &nbsp;·&nbsp; Powered by Django + MySQL
+    </footer>
+  </main>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block scripts %}
+{{ chart_data|json_script:"wgm-data" }}
+<script src="{% static 'core/js/utils.js' %}"></script>
+<script src="{% static 'core/js/dashboard.js' %}"></script>
+{% endblock %}
